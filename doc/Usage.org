@@ -38,7 +38,7 @@ Your system needs to add cl-oauth2 as a dependency
 Tell the system where you want to store your tokens and where the SSL certificate files are.
 
 #+BEGIN_SRC common-lisp
-(setf (logical-pathname-translations "cl-onenote")
+(setf (logical-pathname-translations "cl-your-app")
 ;;; To tell the system where to store token information
       `(("STORE;*.*.*" ,(merge-pathnames (pathname "store/") (asdf:system-source-directory :cl-your-app)))
         ("SSL;*.*.*" ,(merge-pathnames (pathname "ssl/") (asdf:system-source-directory :cl-your-app)))

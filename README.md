@@ -1,5 +1,5 @@
-CL-OAUTH2
-=========
+# CL-OAUTH2
+
 
 This is cl-oauth2, an implementation of the OAuth 2.0 standard
 in Common Lisp.
@@ -14,4 +14,4 @@ untouched, and I'm sure this code is much less robust than that of cl-oauth.
 Any help to improve the code and implement a larger part of the OAuth 2.0
 specification is appreciated.
 
-See docs/ for a usage example.
+See doc/ for a usage example.
