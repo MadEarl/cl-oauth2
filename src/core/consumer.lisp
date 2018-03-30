@@ -27,7 +27,7 @@
                                     (request-method :post)
                                     (timestamp (get-unix-time))
                                     ssl-cert ssl-key)
-  "Obtains initial access-token using grant code. Server sends token to redirect_uri."
+  "Obtains initial access-token using grant code."
   (let* ((parameters (list
                       '("grant_type" . "authorization_code")
                       `("client_id" . ,(token-client-id token))
@@ -62,7 +62,7 @@
                                      (request-method :post)
                                      (timestamp (get-unix-time))
                                     ssl-cert ssl-key)
-  "Obtains fresh access-token using refresh-token. Server sends token to redirect_uri."
+  "Obtains fresh access-token using refresh-token."
   (let* ((parameters (list
                       '("grant_type" . "refresh_token")
                       `("client_id" . ,(token-client-id token))
