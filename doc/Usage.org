@@ -1,0 +1,133 @@
+# Usage.org -- Wolfgang Mederle 2018-03-30 20:38
+#+Title:How to use cl-oauth2
+#+Options: h:1 num:nil
+#+STARTUP: indent
+#+LATEX_CLASS: koma-article
+#+SETUPFILE: ~/Projects/Lisp/org-html-themes/setup/theme-readtheorg.setup
+
+* Setup
+
+If you want to use this library, you probably want to access some resource that is protected by OAuth 2.0. I wrote it to retrieve content from OneNote notebooks via Microsoft's consumer and business API. 
+
+You need:
+
+- a callback URI
+- SSL for that URI
+- a directory to store the persisted access information
+- the grant, token, and API URIs of the service you want to access
+
+** SSL
+
+That's probably the hardest part of the whole setup, because OAuth 2.0 demands you supply a TLS-secured callback URI. I have a fixed IP address for my home network's router, and I used [[https://letsencrypt.org][Letsencrypt]] and certbot to obtain a certificate for that IP address/hostname. Then I configured port forwarding on the router to forward requests to the machine running the Common Lisp system. 
+
+** Base setup
+
+*** System definition
+
+Your system needs to add cl-oauth2 as a dependency
+
+#+BEGIN_SRC common-lisp
+(defsystem :cl-your-app
+  :depends-on (:cl-oauth2)
+...
+)
+#+END_SRC
+
+*** Global configuration
+
+Tell the system where you want to store your tokens and where the SSL certificate files are.
+
+#+BEGIN_SRC common-lisp
+(setf (logical-pathname-translations "cl-onenote")
+;;; To tell the system where to store token information
+      `(("STORE;*.*.*" ,(merge-pathnames (pathname "store/") (asdf:system-source-directory :cl-your-app)))
+        ("SSL;*.*.*" ,(merge-pathnames (pathname "ssl/") (asdf:system-source-directory :cl-your-app)))
+        ))
+#+END_SRC
+
+Supply the names of the SSL certificate and private key file.
+
+#+BEGIN_SRC common-lisp
+(defparameter *ssl-certificate-file* (translate-logical-pathname "cl-onenote:SSL;fullchain1.pem"))
+(defparameter *ssl-privatekey-file* (translate-logical-pathname "cl-onenote:SSL;privkey1.pem"))
+#+END_SRC
+
+Set some behavior.
+
+#+BEGIN_SRC common-lisp
+;; We need square brackets to be allowed.
+(setf puri:*strict-parse* nil)
+(setf drakma:*text-content-types*
+      (cons '("application" . "json")
+            drakma:*text-content-types*))
+(setf drakma:*header-stream* *standard-output*) ; DEBUG -- comment out when no longer needed
+#+END_SRC
+
+* Example: Microsoft Live
+
+Go to [[https://apps.dev.microsoft.com/][the Live.com developer portal]] and register your app. 
+
+Create an initial token with the authentication info you received for your app. The callback server by default uses port 12346, so configure forwarding accordingly or set the slot ~:redirect-port~ to the correct value.
+
+#+BEGIN_SRC common-lisp
+(defparameter *token*
+  (make-token :name "Microsoft-Live"
+              :store-path (translate-logical-pathname "cl-onenote:STORE;microsoft-live.store")
+              :state "some-random-string-or-state-info-for-your-app"
+              :redirect-uri "https://home.example.invalid/oauth"
+              :client-id "app-client-id"
+              :client-secret "app-client-secret"
+              :scope "office.onenote_update wl.signin wl.offline_access" ; or whatever scope you need
+              :code-uri "https://login.live.com/oauth20_authorize.srf"
+              :token-uri "https://login.live.com/oauth20_token.srf"))
+#+END_SRC
+
+Initialize the authentication.
+
+#+BEGIN_SRC common-lisp
+(defun initialize ()
+  "Checks for available access token. If stored, retrieves it from storage and checks for access token.
+   If NIL, attempts to get a new token."
+  (cond ((and (not (null *token*))
+              (not (null (token-access-key *token*))) 'done))
+        ((not (null (probe-file (token-store-path *token*))))
+         (setf *token* (cl-store:restore (token-store-path *token*)))
+         'token-restored)
+        (t
+         (start-callback-server *token*
+                                :ssl-certificate-file (namestring *ssl-certificate-file*)
+                                :ssl-privatekey-file (namestring *ssl-privatekey-file*))
+         (make-oauth2-callback-handler *token*)
+         (obtain-grant-code *token*)
+         (obtain-access-token *token*
+                              :ssl-cert (namestring *ssl-certificate-file*)
+                              :ssl-key (namestring *ssl-privatekey-file*)
+                              :request-method :post) ; MSFT Graph requires :get
+         (store-access-token *token*))))
+#+END_SRC
+
+If all goes well, ~*token*~ contains now both an access and a refresh token. When the access token expired, a call to ~access-protected-resource~ will fail with a 401 error, upon which the refresh token is used to obtain a new access token. It is recommended to call ~(store-access-token *token*)~ before you shut down your system to persist both the current access and the current refresh token.
+
+Now you can define your calls.
+
+#+BEGIN_SRC common-lisp
+(defparameter *oneserver* "https://www.onenote.com/api/v1.0"
+  "URL of OneNote server to be queried.")
+
+(defun one-read (uri)
+  "Calls OneNote API and decodes JSON reply to STDOUT"
+  (multiple-value-bind (body status-code something other headers)
+      (access-protected-resource uri *token*)
+    (declare (ignorable status-code something other))
+    (cond ((search "application/json" (find-value :content-type headers) :test #'equalp)
+           (json:decode-json-from-string body))
+          (t body))))
+
+(defun make-rest-uri (call-string)
+  (concatenate 'string *oneserver* call-string))
+
+(defun get-live-notebooks ()
+  (one-read (make-rest-uri "/notes/notebooks")))
+#+END_SRC
+
+A call to ~get-live-notebooks~ should yield a list of all your OneNote notebooks. 

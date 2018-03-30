@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2018-03-30 Fri 22:55 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>How to use cl-oauth2</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Wolfgang Mederle" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="http://www.pirilampo.org/styles/readtheorg/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="http://www.pirilampo.org/styles/readtheorg/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="http://www.pirilampo.org/styles/readtheorg/js/readtheorg.js"></script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2017 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">How to use cl-oauth2</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org0f2761b">Setup</a></li>
+<li><a href="#org4d8d1e2">Example: Microsoft Live</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org0f2761b" class="outline-2">
+<h2 id="org0f2761b">Setup</h2>
+<div class="outline-text-2" id="text-org0f2761b">
+<p>
+If you want to use this library, you probably want to access some resource that is protected by OAuth 2.0. I wrote it to retrieve content from OneNote notebooks via Microsoft's consumer and business API. 
+</p>
+
+<p>
+You need:
+</p>
+
+<ul class="org-ul">
+<li>a callback URI</li>
+<li>SSL for that URI</li>
+<li>a directory to store the persisted access information</li>
+<li>the grant, token, and API URIs of the service you want to access</li>
+</ul>
+</div>
+
+<ul class="org-ul">
+<li><a id="org7d71557"></a>SSL<br />
+<div class="outline-text-3" id="text-org7d71557">
+<p>
+That's probably the hardest part of the whole setup, because OAuth 2.0 demands you supply a TLS-secured callback URI. I have a fixed IP address for my home network's router, and I used <a href="https://letsencrypt.org">Letsencrypt</a> and certbot to obtain a certificate for that IP address/hostname. Then I configured port forwarding on the router to forward requests to the machine running the Common Lisp system. 
+</p>
+</div>
+</li>
+
+<li><a id="org17686cd"></a>Base setup<br />
+<ul class="org-ul">
+<li><a id="org8544d29"></a>System definition<br />
+<div class="outline-text-4" id="text-org8544d29">
+<p>
+Your system needs to add cl-oauth2 as a dependency
+</p>
+
+<div class="org-src-container">
+<pre class="src src-common-lisp">(defsystem <span style="color: #006FE0;">:cl-your-app</span>
+  <span style="color: #006FE0;">:depends-on</span> (<span style="color: #006FE0;">:cl-oauth2</span>)
+...
+)
+</pre>
+</div>
+</div>
+</li>
+
+<li><a id="org62221a6"></a>Global configuration<br />
+<div class="outline-text-4" id="text-org62221a6">
+<p>
+Tell the system where you want to store your tokens and where the SSL certificate files are.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-common-lisp">(setf (logical-pathname-translations <span style="color: #008000;">"cl-onenote"</span>)
+<span style="color: #8D8D84;">;;; </span><span style="color: #b22222; background-color: #7fffd4; font-weight: bold; font-style: italic;">To tell the system where to store token information</span>
+      `((<span style="color: #008000;">"STORE;*.*.*"</span> ,(merge-pathnames (pathname <span style="color: #008000;">"store/"</span>) (asdf:system-source-directory <span style="color: #006FE0;">:cl-your-app</span>)))
+        (<span style="color: #008000;">"SSL;*.*.*"</span> ,(merge-pathnames (pathname <span style="color: #008000;">"ssl/"</span>) (asdf:system-source-directory <span style="color: #006FE0;">:cl-your-app</span>)))
+        ))
+</pre>
+</div>
+
+<p>
+Supply the names of the SSL certificate and private key file.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-common-lisp">(<span style="color: #0000FF;">defparameter</span> <span style="color: #BA36A5;">*ssl-certificate-file*</span> (translate-logical-pathname <span style="color: #008000;">"cl-onenote:SSL;fullchain1.pem"</span>))
+(<span style="color: #0000FF;">defparameter</span> <span style="color: #BA36A5;">*ssl-privatekey-file*</span> (translate-logical-pathname <span style="color: #008000;">"cl-onenote:SSL;privkey1.pem"</span>))
+</pre>
+</div>
+
+<p>
+Set some behavior.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-common-lisp"><span style="color: #8D8D84;">;; </span><span style="color: #b22222; background-color: #7fffd4; font-weight: bold; font-style: italic;">We need square brackets to be allowed.</span>
+(setf puri:*strict-parse* nil)
+(setf drakma:*text-content-types*
+      (cons '(<span style="color: #008000;">"application"</span> . <span style="color: #008000;">"json"</span>)
+            drakma:*text-content-types*))
+(setf drakma:*header-stream* *standard-output*) <span style="color: #b22222; background-color: #7fffd4; font-weight: bold; font-style: italic;">; DEBUG -- comment out when no longer needed</span>
+</pre>
+</div>
+</div>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+<div id="outline-container-org4d8d1e2" class="outline-2">
+<h2 id="org4d8d1e2">Example: Microsoft Live</h2>
+<div class="outline-text-2" id="text-org4d8d1e2">
+<p>
+Go to <a href="https://apps.dev.microsoft.com/">the Live.com developer portal</a> and register your app. 
+</p>
+
+<p>
+Create an initial token with the authentication info you received for your app. The callback server by default uses port 12346, so configure forwarding accordingly or set the slot <code>:redirect-port</code> to the correct value.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-common-lisp">(<span style="color: #0000FF;">defparameter</span> <span style="color: #BA36A5;">*token*</span>
+  (make-token <span style="color: #006FE0;">:name</span> <span style="color: #008000;">"Microsoft-Live"</span>
+              <span style="color: #006FE0;">:store-path</span> (translate-logical-pathname <span style="color: #008000;">"cl-onenote:STORE;microsoft-live.store"</span>)
+              <span style="color: #006FE0;">:state</span> <span style="color: #008000;">"some-random-string-or-state-info-for-your-app"</span>
+              <span style="color: #006FE0;">:redirect-uri</span> <span style="color: #008000;">"https://home.example.invalid/oauth"</span>
+              <span style="color: #006FE0;">:client-id</span> <span style="color: #008000;">"app-client-id"</span>
+              <span style="color: #006FE0;">:client-secret</span> <span style="color: #008000;">"app-client-secret"</span>
+              <span style="color: #006FE0;">:scope</span> <span style="color: #008000;">"office.onenote_update wl.signin wl.offline_access"</span> <span style="color: #b22222; background-color: #7fffd4; font-weight: bold; font-style: italic;">; or whatever scope you need</span>
+              <span style="color: #006FE0;">:code-uri</span> <span style="color: #008000;">"https://login.live.com/oauth20_authorize.srf"</span>
+              <span style="color: #006FE0;">:token-uri</span> <span style="color: #008000;">"https://login.live.com/oauth20_token.srf"</span>))
+</pre>
+</div>
+
+<p>
+Initialize the authentication.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-common-lisp">(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">initialize</span> ()
+  <span style="color: #036A07;">"Checks for available access token. If stored, retrieves it from storage and checks for access token.</span>
+<span style="color: #036A07;">   If NIL, attempts to get a new token."</span>
+  (<span style="color: #0000FF;">cond</span> ((and (not (null *token*))
+              (not (null (token-access-key *token*))) 'done))
+        ((not (null (probe-file (token-store-path *token*))))
+         (setf *token* (cl-store:restore (token-store-path *token*)))
+         'token-restored)
+        (t
+         (start-callback-server *token*
+                                <span style="color: #006FE0;">:ssl-certificate-file</span> (namestring *ssl-certificate-file*)
+                                <span style="color: #006FE0;">:ssl-privatekey-file</span> (namestring *ssl-privatekey-file*))
+         (make-oauth2-callback-handler *token*)
+         (obtain-grant-code *token*)
+         (obtain-access-token *token*
+                              <span style="color: #006FE0;">:ssl-cert</span> (namestring *ssl-certificate-file*)
+                              <span style="color: #006FE0;">:ssl-key</span> (namestring *ssl-privatekey-file*)
+                              <span style="color: #006FE0;">:request-method</span> <span style="color: #006FE0;">:post</span>) <span style="color: #b22222; background-color: #7fffd4; font-weight: bold; font-style: italic;">; MSFT Graph requires :get</span>
+         (store-access-token *token*))))
+</pre>
+</div>
+
+<p>
+If all goes well, <code>*token*</code> contains now both an access and a refresh token. When the access token expired, a call to <code>access-protected-resource</code> will fail with a 401 error, upon which the refresh token is used to obtain a new access token. It is recommended to call <code>(store-access-token *token*)</code> before you shut down your system to persist both the current access and the current refresh token.
+</p>
+
+<p>
+Now you can define your calls.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-common-lisp">(<span style="color: #0000FF;">defparameter</span> <span style="color: #BA36A5;">*oneserver*</span> <span style="color: #008000;">"https://www.onenote.com/api/v1.0"</span>
+  <span style="color: #008000;">"URL of OneNote server to be queried."</span>)
+
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">one-read</span> (uri)
+  <span style="color: #036A07;">"Calls OneNote API and decodes JSON reply to STDOUT"</span>
+  (<span style="color: #0000FF;">multiple-value-bind</span> (body status-code something other headers)
+      (access-protected-resource uri *token*)
+    (<span style="color: #0000FF;">declare</span> (ignorable status-code something other))
+    (<span style="color: #0000FF;">cond</span> ((search <span style="color: #008000;">"application/json"</span> (find-value <span style="color: #006FE0;">:content-type</span> headers) <span style="color: #006FE0;">:test</span> #'equalp)
+           (json:decode-json-from-string body))
+          (t body))))
+
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">make-rest-uri</span> (call-string)
+  (concatenate 'string *oneserver* call-string))
+
+(<span style="color: #0000FF;">defun</span> <span style="color: #006699;">get-live-notebooks</span> ()
+  (one-read (make-rest-uri <span style="color: #008000;">"/notes/notebooks"</span>)))
+</pre>
+</div>
+
+<p>
+A call to <code>get-live-notebooks</code> should yield a list of all your OneNote notebooks. 
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Wolfgang Mederle</p>
+<p class="date">Created: 2018-03-30 Fri 22:55</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
